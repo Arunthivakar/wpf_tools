@@ -9,10 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controls\ButtonControls\DropDownButton\" />
-    <Folder Include="Controls\ButtonControls\Converter\" />
+    <Folder Include="Controls\ButtonControls\Button\Theme\" />
+    <Folder Include="Controls\ButtonControls\DropDownButton\Theme\" />
     <Folder Include="Controls\ButtonControls\Images\" />
-    <Folder Include="Controls\ButtonControls\SplitButton\" />
+    <Folder Include="Controls\ButtonControls\SplitButton\Theme\" />
   </ItemGroup>
 
 </Project>
