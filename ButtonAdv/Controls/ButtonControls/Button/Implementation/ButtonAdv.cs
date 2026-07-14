@@ -12,27 +12,36 @@ namespace ATAV.Tools.WPF_2026.Controls.ButtonControls.Button.Implementation
 {
     internal class ButtonAdv : ButtonBase, ICommandSource, IButtonAdv
     {
-        #region Initialization
-        #region Constants
+        #region Constants Fields
         private const double SmallIconHeight = 16.0;
         private const double SmallIconWidth = 16.0;
-        private const double NormalIconHeight = 16.0;
-        private const double NormalIconWidth = 16.0;
+        private const double MediumIconHeight = 20.0;
+        private const double MediumIconWidth = 20.0;
         private const double LargeIconHeight = 26.0;
         private const double LargeIconWidth = 26.0;
         #endregion
-        #endregion
+
+        #region Initialization
         public ButtonAdv()
         {
-            //DefaultStyleKey = typeof(ButtonAdv);
             Initialize();
         }
+        private void Initialize()
+        {
+            accessText = GetTemplateChild("accessText") as AccessText;
+            smallIcon = GetTemplateChild("smallIcon") as ContentPresenter;
+            mediumIcon = GetTemplateChild("mediumIcon") as ContentPresenter;
+            largeIcon = GetTemplateChild("largeIcon") as ContentPresenter;
+            UpdateSize();
+
+        }
+        #endregion
 
         #region Private Variables
         private AccessText accessText;
-        private ContentPresenter smallIconContent;
-        private ContentPresenter largeIconContent;
-
+        private ContentPresenter smallIcon;
+        private ContentPresenter mediumIcon;
+        private ContentPresenter largeIcon;
         #endregion
 
         #region Dependency Properties
@@ -100,7 +109,7 @@ namespace ATAV.Tools.WPF_2026.Controls.ButtonControls.Button.Implementation
         public static readonly DependencyProperty IsCheckedProperty =
    DependencyProperty.Register("IsChecked", typeof(bool), typeof(ButtonAdv), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, new PropertyChangedCallback(OnIsCheckedChanged)));
 
-        public ImageSource LageIcon
+        public ImageSource LargeIcon
         {
             get { return (ImageSource)GetValue(LargeIconProperty); }
             set { SetValue(LargeIconProperty, value); }
@@ -115,6 +124,14 @@ namespace ATAV.Tools.WPF_2026.Controls.ButtonControls.Button.Implementation
         }
         public static readonly DependencyProperty SmallIconProperty =
     DependencyProperty.Register("SmallIcon", typeof(ImageSource), typeof(ButtonAdv), new PropertyMetadata(null));
+
+        public ImageSource MediumIcon
+        {
+            get { return (ImageSource)GetValue(MediumIconroperty); }
+            set { SetValue(MediumIconroperty, value); }
+        }
+        public static readonly DependencyProperty MediumIconroperty =
+    DependencyProperty.Register("MediumIcon", typeof(ImageSource), typeof(ButtonAdv), new PropertyMetadata(null));
 
         public double IconWidth
         {
@@ -149,19 +166,57 @@ namespace ATAV.Tools.WPF_2026.Controls.ButtonControls.Button.Implementation
     DependencyProperty.Register("SizeMode", typeof(SizeMode), typeof(ButtonAdv), new PropertyMetadata(SizeMode.Medium, new PropertyChangedCallback(OnSizeChanged)));
         #endregion
 
-        #region Implementation
-        private void Initialize()
-        {
-            UpdateSize();
-
-        }
+        #region SizeChanged
         public void UpdateSize()
         {
+            if (this.SizeMode == SizeMode.Small)
+            {
+                if (smallIcon != null)
+                {
+                    smallIcon.Width = this.IconWidth == 16.0 ? (this.SmallIcon != null || this.IconTemplate != null || this.IconTemplateSelector != null) ? SmallIconWidth : 0 : this.IconWidth;
+                    smallIcon.Height = this.IconHeight == 16.0 ? (this.SmallIcon != null || this.IconTemplate != null || this.IconTemplateSelector != null) ? SmallIconHeight : 0 : this.IconHeight;
+                }
+            }
+            else if (this.SizeMode == SizeMode.Medium)
+            {
+                mediumIcon.Width = this.IconWidth == 20.0 ? (this.MediumIcon != null || this.IconTemplate != null || this.IconTemplateSelector != null) ? MediumIconWidth : 0 : this.IconWidth;
+                mediumIcon.Height = this.IconHeight == 20.0 ? (this.MediumIcon != null || this.IconTemplate != null || this.IconTemplateSelector != null) ? MediumIconHeight : 0 : this.IconHeight;
 
+            }
+            else
+            {
+                if (largeIcon != null)
+                {
+                    largeIcon.Width = this.IconWidth == 26.0 ? (this.LargeIcon != null || this.IconTemplate != null || this.IconTemplateSelector != null) ? LargeIconWidth : 0 : this.IconWidth;
+                    largeIcon.Height = this.IconHeight == 26.0 ? (this.LargeIcon != null || this.IconTemplate != null || this.IconTemplateSelector != null) ? LargeIconHeight : 0 : this.IconHeight;
+                }
+            }
+            if (accessText != null)
+                accessText.Visibility = this.SizeMode == SizeMode.Medium ? Visibility.Visible : Visibility.Collapsed;
         }
+
+        private static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var sender = d as ButtonAdv;
+            var iconTemplate = sender.IconTemplateSelector;
+            if (sender.IconTemplateSelector != null)
+            {
+                sender.IconTemplateSelector = null;
+                sender.IconTemplateSelector = iconTemplate;
+            }
+            sender.OnSizeChanged();
+        }
+        private void OnSizeChanged()
+        {
+            UpdateSize();
+        }
+        #endregion
+
+        #region CheckChanged
         private static void OnIsCheckableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-
+            var sender = d as ButtonAdv;
+            sender.OnIsCheckableChanged();
         }
         private void OnIsCheckableChanged()
         {
@@ -171,20 +226,39 @@ namespace ATAV.Tools.WPF_2026.Controls.ButtonControls.Button.Implementation
         }
         private static void OnIsCheckedChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-
+            var sender = d as ButtonAdv;
+            sender.OnIsCheckedChanged();
         }
         private void OnIsCheckedChanged()
         {
+            if (IsCheckable && Checked != null)
+                Checked(this, new RoutedEventArgs());
+        }
+        #endregion
 
-        }
-        private static void OnSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        {
+        #region Events
+        public event RoutedEventHandler Checked;
+        #endregion
 
-        }
-        private void OnSizeChanged()
+        #region Overrides
+        public override void OnApplyTemplate()
         {
-            UpdateSize();
+            Initialize();
+            base.OnApplyTemplate();
         }
+        protected override void OnClick()
+        {
+            base.OnClick();
+        }
+        protected override void OnMouseLeftButtonDown(MouseButtonEventArgs e)
+        {
+            if (IsCheckable)
+                IsChecked = !IsChecked;
+
+            base.OnMouseLeftButtonDown(e);
+        }
+        #endregion
+
         private static void OnIsCancelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
 
@@ -193,13 +267,6 @@ namespace ATAV.Tools.WPF_2026.Controls.ButtonControls.Button.Implementation
         {
 
         }
-        #endregion
-
-        #region Events
-        #endregion
-
-        #region Overrides
-        #endregion
     }
     public enum SizeMode
     {
